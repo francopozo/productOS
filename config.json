@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "descriptions": {
+      "table_name": "Productos",
+      "field_name": "Descripcion",
+      "name_fields": [
+        "Producto",
+        "SKU"
+      ]
+    }
+  }
+}

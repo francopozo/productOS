@@ -3,6 +3,11 @@ name: Generate Airtable Descriptions
 on:
   workflow_dispatch:
     inputs:
+      task:
+        description: "Task key from config.json"
+        required: false
+        type: string
+        default: "descriptions"
       limit:
         description: "Max number of records to process"
         required: false
@@ -22,12 +27,9 @@ jobs:
     env:
       AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
       AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
-      AIRTABLE_TABLE_NAME: ${{ secrets.AIRTABLE_TABLE_NAME }}
-      AIRTABLE_DESC_FIELD: ${{ secrets.AIRTABLE_DESC_FIELD }}
-      AIRTABLE_NAME_FIELDS: ${{ secrets.AIRTABLE_NAME_FIELDS }}
-      AIRTABLE_SKIP_IF_DESC_EXISTS: ${{ secrets.AIRTABLE_SKIP_IF_DESC_EXISTS }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+      TASK: ${{ github.event.inputs.task }}
+      LIMIT: ${{ github.event.inputs.limit }}
       DRY_RUN: ${{ github.event.inputs.dry_run }}
       LOAD_DOTENV: "false"
       GITHUB_ACTIONS: "true"
