@@ -43,7 +43,7 @@ Puedes definirlas en `.env` o en tu sesion de PowerShell:
 - `CONFIG_FILE`: ruta alternativa de configuracion
 - `DRY_RUN`: simula la ejecucion sin guardar cambios
 - `LIMIT`: limita la cantidad de registros a procesar
-- `LOAD_DOTENV`: carga el archivo `.env` local
+- `LOAD_DOTENV`: opcional; por defecto local carga `.env` automaticamente y en CI/GitHub Actions no lo carga. Puedes forzarlo con `true/false`.
 
 ## Ejecucion local
 

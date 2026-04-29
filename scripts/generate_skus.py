@@ -409,7 +409,8 @@ def _load_task_config(config_path: str, task_name: str) -> Dict[str, Any]:
 
 
 def main() -> int:
-    if env_bool("LOAD_DOTENV", False) and os.getenv("GITHUB_ACTIONS") != "true":
+    auto_load_dotenv = os.getenv("GITHUB_ACTIONS") != "true" and os.getenv("CI") != "true"
+    if env_bool("LOAD_DOTENV", auto_load_dotenv):
         script_dir = os.path.dirname(os.path.abspath(__file__))
         project_dir = os.path.dirname(script_dir)
         load_dotenv_file(
