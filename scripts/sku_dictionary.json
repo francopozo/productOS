@@ -1,0 +1,17 @@
+﻿{
+  "type_map": {
+    "GRAFICA PUBLICITARIA": "GRA",
+    "CREDENCIALES E IDENTIFICACION": "CRE",
+    "CORPORATIVO": "COR",
+    "MERCHANDISING": "MER",
+    "REVISTAS": "REV",
+    "PACKAGING": "PAC",
+    "IMPRESIÓN GRAN FORMATO": "IMP",
+    "DISPLAYS PUBLICITARIOS": "DIS"
+  },
+  "sub_map": {
+    "TARJETAS PERSONALES": "TAR",
+    "ESCRITURA": "ESC"
+  },
+  "var_map": {}
+}

@@ -1,12 +1,22 @@
-{
-  "tasks": {
-    "descriptions": {
-      "table_name": "Productos",
-      "field_name": "Descripcion",
-      "name_fields": [
-        "Producto",
-        "SKU"
-      ]
-    }
-  }
+﻿{
+    "tasks":  {
+                  "descriptions":  {
+                                       "table_name":  "Productos",
+                                       "field_name":  "Descripcion",
+                                       "name_fields":  [
+                                                           "Producto",
+                                                           "SKU"
+                                                       ]
+                                   },
+                  "skus":  {
+                               "table_name":  "Productos",
+                               "categoria_field":  "Categoria-Look",
+                               "grupo_field":  "Grupo-Look",
+                               "producto_field":  "Producto",
+                               "sku_field":  "SKU",
+                               "var_field":  "",
+                               "dictionary_file":  "scripts/sku_dictionary.json",
+                               "id_padding":  3
+                           }
+              }
 }

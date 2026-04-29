@@ -1,77 +1,64 @@
 # productOS
 
-Script para leer productos desde Airtable, generar descripciones comerciales con OpenAI y guardarlas en Airtable.
+`productOS` es un conjunto de herramientas para automatizar tareas de catalogo en Airtable.
+
+El proyecto centraliza procesos repetitivos para mantener consistencia en los productos, reducir trabajo manual y dejar listo el catalogo con una misma logica de operacion.
+
+## Que hace
+
+- Genera descripciones comerciales para productos.
+- Construye SKUs de forma ordenada y repetible.
+- Trabaja sobre registros ya existentes en Airtable.
+- Permite agregar nuevas tareas sin cambiar la estructura general del proyecto.
+
+## Herramientas incluidas
+
+- `generate_descriptions.py`: lee productos desde una tabla de Airtable, genera una descripcion comercial con OpenAI y la guarda en el campo configurado.
+- `generate_skus.py`: toma los campos del producto, aplica reglas de normalizacion y crea un SKU consistente para cada registro.
+
+## Como se organiza
+
+El proyecto usa `config.json` para definir las tareas disponibles. Cada tarea puede apuntar a una tabla distinta y a los campos que necesita.
+
+En la practica, `TASK` define que flujo se ejecuta:
+
+- `descriptions` para generar o actualizar descripciones.
+- `skus` para crear codigos SKU.
 
 ## Requisitos
 
 - Python 3.10+
 - `AIRTABLE_API_KEY`
 - `AIRTABLE_BASE_ID`
-- `OPENAI_API_KEY`
+- `OPENAI_API_KEY` para la tarea de descripciones
 
-## Configuración principal (`config.json`)
+## Configuracion y variables
 
-La configuración se define por tareas:
-
-```json
-{
-  "tasks": {
-    "descriptions": {
-      "table_name": "Productos",
-      "field_name": "Descripcion",
-      "name_fields": ["Producto", "SKU"]
-    }
-  }
-}
-```
-
-La variable `TASK` selecciona la tarea a ejecutar (por defecto: `descriptions`).
-
-## Variables de entorno
-
-Puedes definirlas en `.env` o en tu sesión de PowerShell:
+Puedes definirlas en `.env` o en tu sesion de PowerShell:
 
 - `AIRTABLE_API_KEY`: token de Airtable
 - `AIRTABLE_BASE_ID`: base de Airtable
 - `OPENAI_API_KEY`: clave de OpenAI
-- `TASK`: nombre de la tarea en `config.json` (default: `descriptions`)
-- `CONFIG_FILE`: ruta alternativa de config (opcional)
-- `AIRTABLE_SKIP_IF_DESC_EXISTS`: `true` o `false` (default: `true`)
-- `OPENAI_MODEL`: modelo (default: `gpt-4.1-mini`)
-- `OPENAI_API_URL`: endpoint (default: `https://api.openai.com/v1/chat/completions`)
-- `DRY_RUN`: `true` para simular sin escribir en Airtable
-- `LIMIT`: límite de registros a procesar (opcional)
-- `LOAD_DOTENV`: `true` para cargar `.env` localmente
+- `TASK`: tarea a ejecutar
+- `CONFIG_FILE`: ruta alternativa de configuracion
+- `DRY_RUN`: simula la ejecucion sin guardar cambios
+- `LIMIT`: limita la cantidad de registros a procesar
+- `LOAD_DOTENV`: carga el archivo `.env` local
 
-## Compatibilidad (legacy)
-
-El script mantiene fallback para variables antiguas (`TABLE_NAME`, `FIELD_NAME`, `NAME_FIELDS`, `AIRTABLE_*`) para no romper ejecución actual, pero la ruta recomendada es `config.json` + `TASK`.
-
-## Uso local
+## Ejecucion local
 
 ```powershell
 py -3 .\scripts\generate_descriptions.py --dry-run
-py -3 .\scripts\generate_descriptions.py
-py -3 .\scripts\generate_descriptions.py --task descriptions
 py -3 .\scripts\generate_descriptions.py --limit 10
-py -3 .\scripts\generate_descriptions.py --overwrite
+py -3 .\scripts\generate_skus.py
 ```
+
+## Flujo general
+
+- `generate_descriptions.py` revisa cada producto, evita duplicados y puede omitir registros que ya tienen descripcion, salvo que se indique lo contrario.
+- `generate_skus.py` solo completa el SKU cuando el campo esta vacio y sigue reglas consistentes de formato para el catalogo.
+- Ambos scripts se apoyan en una configuracion comun para que el proyecto se mantenga ordenado y extensible.
 
 ## GitHub Actions
 
-Workflow: `.github/workflows/generate_descriptions.yml`
-
-- Secrets requeridos:
-  - `OPENAI_API_KEY`
-  - `AIRTABLE_API_KEY`
-  - `AIRTABLE_BASE_ID`
-- Inputs de `workflow_dispatch`:
-  - `task` (default: `descriptions`)
-  - `limit`
-  - `dry_run`
-
-## Dedupe y comportamiento
-
-- No procesa dos veces el mismo producto si comparte los campos definidos en `name_fields` de la tarea.
-- Evita regenerar si el campo objetivo ya tiene contenido, salvo que uses `--overwrite`.
-- Intenta que la descripción generada no sea idéntica a otra ya producida en la misma corrida.
+El proyecto tambien puede ejecutarse desde GitHub Actions para automatizar estas tareas sin hacerlo manualmente.
