@@ -1,0 +1,93 @@
+name: Run Airtable Script
+
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Python script inside scripts/ (without .py)"
+        required: true
+        type: choice
+        options:
+          - generate_descriptions
+          - generate_skus
+        default: "generate_skus"
+      task:
+        description: "Task key from config.json (optional)"
+        required: false
+        type: string
+        default: ""
+      limit:
+        description: "Max number of records to process (only if script supports --limit)"
+        required: false
+        type: string
+      dry_run:
+        description: "Run without updating Airtable (adds --dry-run if script supports it)"
+        required: false
+        type: boolean
+        default: true
+      extra_args:
+        description: "Extra CLI args for the selected script (optional)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    env:
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+      AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      SCRIPT: ${{ github.event.inputs.script }}
+      TASK: ${{ github.event.inputs.task }}
+      LIMIT: ${{ github.event.inputs.limit }}
+      DRY_RUN: ${{ github.event.inputs.dry_run }}
+      EXTRA_ARGS: ${{ github.event.inputs.extra_args }}
+      LOAD_DOTENV: "false"
+      GITHUB_ACTIONS: "true"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate selected script
+        run: |
+          SCRIPT_PATH="scripts/${SCRIPT}.py"
+          if [ ! -f "$SCRIPT_PATH" ]; then
+            echo "Script not found: $SCRIPT_PATH"
+            exit 1
+          fi
+
+      - name: Run selected script
+        run: |
+          SCRIPT_PATH="scripts/${SCRIPT}.py"
+          cmd=(python "$SCRIPT_PATH")
+
+          if [ -n "${TASK}" ]; then
+            cmd+=("--task" "${TASK}")
+          fi
+
+          if [ "${DRY_RUN}" = "true" ]; then
+            cmd+=("--dry-run")
+          fi
+
+          if [ -n "${LIMIT}" ] && [ "${SCRIPT}" = "generate_descriptions" ]; then
+            cmd+=("--limit" "${LIMIT}")
+          fi
+
+          if [ -n "${EXTRA_ARGS}" ]; then
+            # EXTRA_ARGS is intentionally free-form to keep this workflow reusable.
+            # shellcheck disable=SC2206
+            extra=( ${EXTRA_ARGS} )
+            cmd+=("${extra[@]}")
+          fi
+
+          echo "Running: ${cmd[*]}"
+          "${cmd[@]}"

@@ -62,3 +62,23 @@ py -3 .\scripts\generate_skus.py
 ## GitHub Actions
 
 El proyecto tambien puede ejecutarse desde GitHub Actions para automatizar estas tareas sin hacerlo manualmente.
+
+Workflow disponible: `Run Airtable Script` (`.github/workflows/run_airtable_script.yml`)
+
+- `script`: selecciona el script dentro de `scripts/` (por ejemplo `generate_skus` o `generate_descriptions`).
+- `task`: key opcional de `config.json` que se pasa como `--task`.
+- `dry_run`: agrega `--dry-run` al comando.
+- `limit`: se aplica a `generate_descriptions` como `--limit`.
+- `extra_args`: argumentos extra para extender la ejecucion sin editar el workflow.
+
+Ejemplos desde `workflow_dispatch`:
+
+- SKUs:
+  - `script=generate_skus`
+  - `task=skus`
+  - `dry_run=true`
+- Descripciones:
+  - `script=generate_descriptions`
+  - `task=descriptions`
+  - `limit=25`
+  - `dry_run=true`
