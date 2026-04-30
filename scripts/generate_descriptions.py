@@ -70,7 +70,7 @@ def env_list(name: str, default: Sequence[str]) -> List[str]:
 def load_task_config(config_path: str, task_name: str) -> Dict[str, Any]:
     if not os.path.isfile(config_path):
         return {}
-    with open(config_path, "r", encoding="utf-8") as handle:
+    with open(config_path, "r", encoding="utf-8-sig") as handle:
         data = json.load(handle)
     tasks = data.get("tasks", {})
     task = tasks.get(task_name)
@@ -80,7 +80,7 @@ def load_task_config(config_path: str, task_name: str) -> Dict[str, Any]:
 def list_task_names(config_path: str) -> List[str]:
     if not os.path.isfile(config_path):
         return []
-    with open(config_path, "r", encoding="utf-8") as handle:
+    with open(config_path, "r", encoding="utf-8-sig") as handle:
         data = json.load(handle)
     tasks = data.get("tasks", {})
     if not isinstance(tasks, dict):
