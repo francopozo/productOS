@@ -5,7 +5,7 @@
       "type": "remote",
       "url": "https://n8n.ideamax.com.bo/mcp-server/http",
       "headers": {
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjQ3NjVmMS01NjY3LTQ0ZjYtOTc3ZS0zNTczYWIxODIyMmYiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6IjM4MjhiMzNiLWMwYjctNDFiYS05MDYxLWU5YmJkMWMxZDNkMiIsImlhdCI6MTc3Nzc3NTIwOH0.jY5VXUwrzWJotodrbj9vatMrIgUstXiczF8tFZsYtH0"
+        "Authorization": "{env:N8N_MCP_AUTHORIZATION}"
       },
       "enabled": true
     }

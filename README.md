@@ -1,29 +1,38 @@
 # productOS
 
-`productOS` es un conjunto de herramientas para automatizar tareas de catalogo en Airtable.
+`productOS` es un conjunto de herramientas para automatizar tareas de catalogo y preparar automatizaciones asistidas por AI.
 
-El proyecto centraliza procesos repetitivos para mantener consistencia en los productos, reducir trabajo manual y dejar listo el catalogo con una misma logica de operacion.
+El proyecto organiza dos areas de trabajo dentro del mismo repositorio:
+
+- `modules/airtable-actions/`: scripts y documentacion para procesos sobre Airtable y ejecucion con GitHub Actions.
+- `modules/n8n-automation/`: documentacion, prompts y diseno de automatizaciones para n8n.
+
+La idea es mantener separados los contextos de trabajo sin dividir el proyecto en varios repositorios.
 
 ## Que hace
 
 - Genera descripciones comerciales para productos.
-- Construye SKUs de forma ordenada y repetible.
-- Trabaja sobre registros ya existentes en Airtable.
-- Permite agregar nuevas tareas sin cambiar la estructura general del proyecto.
+- Construye SKUs de forma consistente.
+- Ejecuta procesos manuales o remotos sobre Airtable.
+- Sirve como base de trabajo para disenar automatizaciones n8n con apoyo de agentes AI.
 
 ## Herramientas incluidas
 
-- `generate_descriptions.py`: lee productos desde una tabla de Airtable, genera una descripcion comercial con OpenAI y la guarda en el campo configurado.
-- `generate_skus.py`: toma los campos del producto, aplica reglas de normalizacion y crea un SKU consistente para cada registro.
+- `scripts/generate_descriptions.py`: lee productos desde Airtable, genera una descripcion comercial con OpenAI y la guarda en el campo configurado.
+- `scripts/generate_skus.py`: toma los campos del producto, aplica reglas de normalizacion y crea un SKU consistente para cada registro.
 
 ## Como se organiza
 
-El proyecto usa `config.json` para definir las tareas disponibles. Cada tarea puede apuntar a una tabla distinta y a los campos que necesita.
+El repo se divide en dos modulos:
 
-En la practica, `TASK` define que flujo se ejecuta:
+- `modules/airtable-actions/` concentra el contexto de Airtable, scripts Python, configuracion y GitHub Actions.
+- `modules/n8n-automation/` concentra el contexto de prompts, patrones, ideas y estructura de automatizaciones n8n.
 
-- `descriptions` para generar o actualizar descripciones.
-- `skus` para crear codigos SKU.
+Los archivos operativos del flujo Airtable permanecen en:
+
+- `scripts/`
+- `config.json`
+- `.github/workflows/run_airtable_script.yml`
 
 ## Requisitos
 
@@ -34,7 +43,7 @@ En la practica, `TASK` define que flujo se ejecuta:
 
 ## Configuracion y variables
 
-Puedes definirlas en `.env` o en tu sesion de PowerShell:
+Puedes definirlas en `.env` o en tu sesion de terminal:
 
 - `AIRTABLE_API_KEY`: token de Airtable
 - `AIRTABLE_BASE_ID`: base de Airtable
@@ -43,7 +52,7 @@ Puedes definirlas en `.env` o en tu sesion de PowerShell:
 - `CONFIG_FILE`: ruta alternativa de configuracion
 - `DRY_RUN`: simula la ejecucion sin guardar cambios
 - `LIMIT`: limita la cantidad de registros a procesar
-- `LOAD_DOTENV`: opcional; por defecto local carga `.env` automaticamente y en CI/GitHub Actions no lo carga. Puedes forzarlo con `true/false`.
+- `LOAD_DOTENV`: controla si se carga `.env` automaticamente
 
 ## Ejecucion local
 
@@ -55,30 +64,28 @@ py -3 .\scripts\generate_skus.py
 
 ## Flujo general
 
-- `generate_descriptions.py` revisa cada producto, evita duplicados y puede omitir registros que ya tienen descripcion, salvo que se indique lo contrario.
-- `generate_skus.py` solo completa el SKU cuando el campo esta vacio y sigue reglas consistentes de formato para el catalogo.
-- Ambos scripts se apoyan en una configuracion comun para que el proyecto se mantenga ordenado y extensible.
+- `generate_descriptions.py` revisa productos, evita duplicados y puede omitir registros que ya tienen descripcion.
+- `generate_skus.py` completa el SKU cuando el campo esta vacio y aplica reglas consistentes de formato.
+- Ambos scripts usan `config.json` para resolver tareas y mantener un comportamiento explicito.
 
 ## GitHub Actions
 
-El proyecto tambien puede ejecutarse desde GitHub Actions para automatizar estas tareas sin hacerlo manualmente.
+El proyecto tambien puede ejecutarse desde GitHub Actions.
 
-Workflow disponible: `Run Airtable Script` (`.github/workflows/run_airtable_script.yml`)
+Workflow disponible:
 
-- `script`: selecciona el script dentro de `scripts/` (por ejemplo `generate_skus` o `generate_descriptions`).
-- `task`: key opcional de `config.json` que se pasa como `--task`.
-- `dry_run`: agrega `--dry-run` al comando.
-- `limit`: se aplica a `generate_descriptions` como `--limit`.
-- `extra_args`: argumentos extra para extender la ejecucion sin editar el workflow.
+- `.github/workflows/run_airtable_script.yml`
 
-Ejemplos desde `workflow_dispatch`:
+Inputs principales:
 
-- SKUs:
-  - `script=generate_skus`
-  - `task=skus`
-  - `dry_run=true`
-- Descripciones:
-  - `script=generate_descriptions`
-  - `task=descriptions`
-  - `limit=25`
-  - `dry_run=true`
+- `script`
+- `task`
+- `dry_run`
+- `limit`
+- `extra_args`
+
+## Navegacion rapida
+
+- `docs/mapa-repo.md`: mapa del repositorio
+- `docs/arquitectura.md`: arquitectura del proyecto
+- `docs/contratos-scripts.md`: contratos de scripts
