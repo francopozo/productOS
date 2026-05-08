@@ -5,7 +5,7 @@
       "type": "remote",
       "url": "https://n8n.ideamax.com.bo/mcp-server/http",
       "headers": {
-        "Authorization": "{env:N8N_MCP_AUTHORIZATION}"
+        "Authorization": "{file:~/.secrets/n8n_mcp_authorization}"
       },
       "enabled": true
     }

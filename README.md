@@ -16,6 +16,16 @@ La idea es mantener separados los contextos de trabajo sin dividir el proyecto e
 - Ejecuta procesos manuales o remotos sobre Airtable.
 - Sirve como base de trabajo para disenar automatizaciones n8n con apoyo de agentes AI.
 
+## Avance Actual
+
+Ya existe una automatizacion n8n publicada llamada `Airtable-Woo`.
+
+- origen: Airtable `CatalogOS > Productos`
+- destino: WooCommerce
+- comportamiento actual: crea productos simples en estado `draft` cuando aparece un nuevo registro
+- documentacion operativa: `modules/n8n-automation/docs/airtable-woocommerce-minimo.md`
+- base SDK local: `modules/n8n-automation/workflows/airtable-woo-sdk.js`
+
 ## Herramientas incluidas
 
 - `scripts/generate_descriptions.py`: lee productos desde Airtable, genera una descripcion comercial con OpenAI y la guarda en el campo configurado.

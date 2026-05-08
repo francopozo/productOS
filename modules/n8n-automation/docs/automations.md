@@ -2,6 +2,16 @@
 
 Catalogo base para definir automatizaciones n8n.
 
+## Automatizaciones Activas O En Curso
+
+### Airtable-Woo
+
+- objetivo: crear productos simples en WooCommerce desde nuevos registros de Airtable
+- workflow id: `Hl7g6exfaDKNMjzg`
+- trigger: `Airtable Trigger` sobre `CatalogOS > Productos`
+- estado: publicado y funcional en prueba inicial
+- documento operativo: `docs/airtable-woocommerce-minimo.md`
+
 ## Plantilla Sugerida
 
 Para cada automatizacion documenta:
