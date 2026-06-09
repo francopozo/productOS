@@ -1,59 +1,64 @@
 # productOS
 
-`productOS` es un conjunto de herramientas para automatizar tareas de catalogo y preparar automatizaciones asistidas por AI.
+`productOS` centraliza automatizaciones y utilidades para operar el catalogo desde Airtable, n8n y scripts locales.
 
-El proyecto organiza dos areas de trabajo dentro del mismo repositorio:
+El repositorio separa dos contextos de trabajo:
 
-- `modules/airtable-actions/`: scripts y documentacion para procesos sobre Airtable y ejecucion con GitHub Actions.
-- `modules/n8n-automation/`: documentacion, prompts y diseno de automatizaciones para n8n.
+- `modules/airtable-actions/`: scripts, configuracion y ejecucion remota sobre Airtable.
+- `modules/n8n-automation/`: workflows SDK, documentacion operativa y material de diseno para n8n.
 
-La idea es mantener separados los contextos de trabajo sin dividir el proyecto en varios repositorios.
+## Alcance
 
-## Que hace
+- generar descripciones comerciales
+- generar SKUs consistentes
+- sincronizar productos hacia otros sistemas
+- dejar contratos claros para que otro coding agent pueda continuar sin reconstruir reglas desde cero
 
-- Genera descripciones comerciales para productos.
-- Construye SKUs de forma consistente.
-- Ejecuta procesos manuales o remotos sobre Airtable.
-- Sirve como base de trabajo para disenar automatizaciones n8n con apoyo de agentes AI.
+## Automatizaciones actuales
 
-## Avance Actual
-
-Ya existe una automatizacion n8n publicada llamada `Airtable-Woo`.
+### Airtable-Woo
 
 - origen: Airtable `CatalogOS > Productos`
 - destino: WooCommerce
-- comportamiento actual: crea productos simples en estado `draft` cuando aparece un nuevo registro
-- documentacion operativa: `modules/n8n-automation/docs/airtable-woocommerce-minimo.md`
-- base SDK local: `modules/n8n-automation/workflows/airtable-woo-sdk.js`
+- estado documentado: Fase 1 versionada en SDK local
+- documento operativo: `modules/n8n-automation/docs/airtable-woocommerce-minimo.md`
+- SDK local: `modules/n8n-automation/workflows/airtable-woo-sdk.js`
 
-## Herramientas incluidas
+### Airtable-Generate-Descriptions
 
-- `scripts/generate_descriptions.py`: lee productos desde Airtable, genera una descripcion comercial con OpenAI y la guarda en el campo configurado.
-- `scripts/generate_skus.py`: toma los campos del producto, aplica reglas de normalizacion y crea un SKU consistente para cada registro.
+- origen: Airtable `CatalogOS > Productos`
+- destino: campo `Descripcion` en Airtable
+- estado documentado: workflow operativo con SDK local
+- documento operativo: `modules/n8n-automation/docs/airtable-generate-descriptions.md`
+- SDK local: `modules/n8n-automation/workflows/airtable-generate-descriptions-sdk.js`
 
-## Como se organiza
+### Airtable-Generate-SKUs
 
-El repo se divide en dos modulos:
+- origen: Airtable `CatalogOS > Productos`
+- destino: campo `SKU` en Airtable
+- estado documentado: workflow operativo con SDK local
+- documento operativo: `modules/n8n-automation/docs/airtable-generate-skus.md`
+- SDK local: `modules/n8n-automation/workflows/airtable-generate-skus-sdk.js`
 
-- `modules/airtable-actions/` concentra el contexto de Airtable, scripts Python, configuracion y GitHub Actions.
-- `modules/n8n-automation/` concentra el contexto de prompts, patrones, ideas y estructura de automatizaciones n8n.
+## Scripts locales
 
-Los archivos operativos del flujo Airtable permanecen en:
+- `scripts/generate_descriptions.py`: genera descripciones comerciales con OpenAI y escribe el resultado en Airtable.
+- `scripts/generate_skus.py`: version local de referencia para reglas de SKU; la operacion principal ya tiene workflow equivalente en n8n.
 
-- `scripts/`
-- `config.json`
-- `.github/workflows/run_airtable_script.yml`
+## Estructura
+
+- `modules/airtable-actions/` concentra scripts Python, contratos y ejecucion por GitHub Actions.
+- `modules/n8n-automation/` concentra workflows, prompts y documentacion viva de automatizaciones.
+- `scripts/`, `config.json` y `.github/workflows/run_airtable_script.yml` mantienen el flujo local/remoto basado en Python.
 
 ## Requisitos
 
 - Python 3.10+
 - `AIRTABLE_API_KEY`
 - `AIRTABLE_BASE_ID`
-- `OPENAI_API_KEY` para la tarea de descripciones
+- `OPENAI_API_KEY` para descripciones
 
-## Configuracion y variables
-
-Puedes definirlas en `.env` o en tu sesion de terminal:
+## Variables utiles
 
 - `AIRTABLE_API_KEY`: token de Airtable
 - `AIRTABLE_BASE_ID`: base de Airtable
@@ -61,8 +66,8 @@ Puedes definirlas en `.env` o en tu sesion de terminal:
 - `TASK`: tarea a ejecutar
 - `CONFIG_FILE`: ruta alternativa de configuracion
 - `DRY_RUN`: simula la ejecucion sin guardar cambios
-- `LIMIT`: limita la cantidad de registros a procesar
-- `LOAD_DOTENV`: controla si se carga `.env` automaticamente
+- `LIMIT`: limita registros procesados
+- `LOAD_DOTENV`: controla la carga automatica de `.env`
 
 ## Ejecucion local
 
@@ -72,30 +77,9 @@ py -3 .\scripts\generate_descriptions.py --limit 10
 py -3 .\scripts\generate_skus.py
 ```
 
-## Flujo general
-
-- `generate_descriptions.py` revisa productos, evita duplicados y puede omitir registros que ya tienen descripcion.
-- `generate_skus.py` completa el SKU cuando el campo esta vacio y aplica reglas consistentes de formato.
-- Ambos scripts usan `config.json` para resolver tareas y mantener un comportamiento explicito.
-
-## GitHub Actions
-
-El proyecto tambien puede ejecutarse desde GitHub Actions.
-
-Workflow disponible:
-
-- `.github/workflows/run_airtable_script.yml`
-
-Inputs principales:
-
-- `script`
-- `task`
-- `dry_run`
-- `limit`
-- `extra_args`
-
 ## Navegacion rapida
 
 - `docs/mapa-repo.md`: mapa del repositorio
-- `docs/arquitectura.md`: arquitectura del proyecto
+- `docs/arquitectura.md`: arquitectura general
 - `docs/contratos-scripts.md`: contratos de scripts
+- `modules/n8n-automation/docs/automations.md`: indice de automatizaciones

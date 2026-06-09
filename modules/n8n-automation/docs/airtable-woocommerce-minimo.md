@@ -1,140 +1,136 @@
-# Airtable -> WooCommerce Minimo
+# Airtable -> WooCommerce Fase 1
 
 ## Objetivo
 
-Crear un producto simple en WooCommerce desde un nuevo registro en Airtable usando un flujo enteramente dentro de n8n.
+Crear productos simples en WooCommerce desde registros de Airtable con control por registro, validacion previa y escritura de vuelta a Airtable.
 
-## Estado Confirmado
+## Workflow Objetivo
 
-- workflow existente en n8n: `Airtable-Woo`
+- workflow en n8n: `Airtable-Woo`
 - workflow id: `Hl7g6exfaDKNMjzg`
-- URL: `https://n8n.ideamax.com.bo/workflow/Hl7g6exfaDKNMjzg`
-- estado actual: publicado
-- creacion validada: funciona creando productos simples en WooCommerce
-- publicacion en `draft` para evitar exponer productos incompletos
+- SDK local: `modules/n8n-automation/workflows/airtable-woo-sdk.js`
+- estado documentado: Fase 1 versionada en SDK local
+
+## Fuente De Verdad
+
+Tomar como fuente de verdad, en este orden:
+
+1. el workflow activo en n8n
+2. el SDK local `modules/n8n-automation/workflows/airtable-woo-sdk.js`
+3. esta documentacion como contrato funcional
+
+Si hay diferencia entre esta pagina y el workflow real, prevalece el workflow activo y luego hay que corregir la documentacion.
 
 ## Alcance Actual
 
-- solo alta de productos
-- solo campos minimos para prueba
-- credenciales cargadas manualmente por el usuario
-- sin precio todavia
-- sin escritura de vuelta a Airtable todavia
+- Fase 1 implementada en el SDK local
+- diseno centrado en alta de productos
+- evita recrear registros que ya tienen `Woo ID`
+- escribe `Woo ID`, `Woo URL`, `Woo Estado Sync`, `Woo Ult Sync` y `Woo Error` en Airtable
+- usa `Categoria` como `single select` local en `Productos`
+- ya no depende de `Categorias`, `Categoria-Look`, `Grupo` ni `Grupo-Look` en runtime
+- deja `Grupo` fuera de esta fase
 
-## Trigger
+## Campos Requeridos En Airtable
 
-- `Airtable Trigger`
-- evento esperado: nuevo registro en `CatalogOS > Productos`
-- polling actual: cada minuto
-- `triggerField` manual confirmado: `Created`
+### Tabla `Productos`
 
-## Dependencias
+Crear manualmente solo si esos campos aun no existen:
 
-- credencial Airtable dentro de n8n
-- credencial WooCommerce dentro de n8n
-- acceso a la tabla `Productos` en la base `CatalogOS`
+- `Woo Sync` (`checkbox`)
+- `Woo ID` (`single line text`)
+- `Woo URL` (`single line text` o `url`)
+- `Woo Estado Sync` (`single select`)
+- `Woo Ult Sync` (`dateTime`)
+- `Woo Error` (`multiline text`)
+- `Woo Trigger Modified` (`last modified time`)
 
-## Ubicacion De Datos
+Configurar `Woo Trigger Modified` para observar como minimo:
 
-- base Airtable: `CatalogOS`
-- base id: `appaM2jqwYMS6fbiY`
-- tabla: `Productos`
-- table id: `tblnPHhOefx9R4NnT`
+- `Woo Sync`
+- `Producto`
+- `Descripcion`
+- `SKU`
+- `Attachments`
+- `Disponibilidad`
+- `Categoria`
 
-## Campos Confirmados En Airtable
+Campos ya existentes usados por el flujo:
 
-Campos vistos en el workflow original o usados durante esta iteracion:
-
-- `Created`
 - `Producto`
 - `Descripcion`
 - `SKU`
 - `Disponibilidad`
 - `Categoria`
-- `Grupo`
 - `Attachments`
-- `Caracteristica`
 
-## Mapeo Actual A WooCommerce
+## Comportamiento De Fase 1
+
+### Trigger
+
+- nodo: `Airtable Product Sync Trigger`
+- base: `CatalogOS`
+- tabla: `Productos`
+- trigger field: `Woo Trigger Modified`
+- filtro: `AND({Woo Sync}=1)`
+
+### Validacion
+
+Antes de crear en Woo:
+
+- `Producto` debe existir
+- `SKU` debe existir
+- `Categoria` debe existir
+- `Woo ID` debe estar vacio
+
+Si falla una validacion:
+
+- `Woo Estado Sync = Error`
+- `Woo Error = mensaje legible`
+
+### Mapeo A WooCommerce
 
 - `Producto` -> `name`
 - `Descripcion` -> `description`
 - `SKU` -> `sku`
+- `Disponibilidad` -> `stockStatus`
+- `Attachments[0].url` -> imagen principal si existe
 - valor fijo -> `status = draft`
 - valor fijo -> `type = simple`
 
-## Payload Minimo Real
+## Escritura De Vuelta A Airtable
 
-```json
-{
-  "name": "Producto demo",
-  "description": "Descripcion corta de prueba",
-  "sku": "SKU-DEMO-001",
-  "status": "draft",
-  "type": "simple"
-}
-```
+En alta exitosa:
 
-## Estructura Actual Del Workflow
+- `Woo ID`
+- `Woo URL`
+- `Woo Estado Sync = Enviado`
+- `Woo Ult Sync = fecha ISO`
+- `Woo Error = ""`
 
-1. `Airtable New Product`
-2. `Map Woo Fields`
-3. `Create Woo Product`
+En error previo a Woo:
 
-## Nodos Actuales
+- `Woo Estado Sync = Error`
+- `Woo Error = mensaje`
 
-### Airtable New Product
+## Credenciales
 
-- tipo: `n8n-nodes-base.airtableTrigger`
-- base: `CatalogOS`
-- tabla: `Productos`
-- trigger field: `Created`
-- fields incluidos: `Producto,Descripcion,SKU,Disponibilidad,Categoria,Grupo,Attachments,Caracteristica`
+Verificar antes de publicar cambios:
 
-### Map Woo Fields
+1. crear los campos nuevos en Airtable
+2. reconectar credencial Airtable en:
+   - trigger
+   - `Write Validation Error To Airtable`
+   - `Write Woo Success To Airtable`
+3. reconectar credencial WooCommerce en:
+   - `Create Woo Product Without Image`
+   - `Create Woo Product With Image`
+4. probar con un registro controlado
+5. publicar el workflow
 
-- tipo: `n8n-nodes-base.set`
-- crea:
-  - `wc_name`
-  - `wc_description`
-  - `wc_sku`
-  - `wc_status`
-  - `wc_type`
+## Limitaciones Conocidas
 
-### Create Woo Product
-
-- tipo: `n8n-nodes-base.wooCommerce`
-- resource: `product`
-- operation: `create`
-- crea producto `simple`
-- guarda producto en `draft`
-
-## Pasos Manuales Vigentes
-
-- conectar credencial Airtable en el trigger
-- conectar credencial WooCommerce en el nodo de creacion
-- mantener `triggerField = Created`
-- si cambia el nombre del campo de tiempo, actualizar tambien el trigger
-
-## Resultado De La Prueba
-
-- creacion exitosa confirmada por el usuario
-- el trigger detecta nuevos registros
-- WooCommerce recibe el producto minimo correctamente
-
-## Estado Actual
-
-- workflow validado via `n8n-mcp`
-- workflow actualizado en n8n via SDK
-- workflow publicado manualmente por el usuario
-- export SDK local guardado en `workflows/airtable-woo-sdk.js`
-
-## Mejoras Futuras Sugeridas
-
-- agregar precio cuando exista o se confirme el campo correcto en Airtable
-- devolver a Airtable el ID o URL del producto creado en WooCommerce
-- evitar duplicados usando SKU o un campo de control
-- mapear categorias o grupos a categorias reales de WooCommerce
-- adjuntar imagenes si `Attachments` contiene URLs validas
-- agregar validacion previa si falta `Producto`
-- publicar o no publicar segun una bandera de Airtable
+- esta fase no actualiza productos existentes en WooCommerce
+- por ahora el workflow no asigna categoria en WooCommerce aunque si valida que el `single select` `Categoria` exista
+- si quieres asignar categoria tambien en Woo, el siguiente paso sera mapear cada opcion del `single select` a su Woo category ID
+- la Fase 2 seguira con conciliacion por `SKU` y actualizacion por `Woo ID` o match unico por SKU
